@@ -15,9 +15,9 @@ int main()
     cout<<"Enter 0 for undirected Graph and 1 for directed : ";
     cin>>direction;
     GraphAL myGraph = GraphAL(direction);
-   while(!flag)
+    while(!flag)
     {
-        cout<<"1 for Inserting a Vertex, 2 for Adding an Edge,\n 3 for getting degree of a vertex, 4 for Displaying the Adjacency List,\n 5 for Searcing by BFS and 6 for Searching by DFS \n and 7 for Finding path : ";
+        cout<<"1 for Inserting a Vertex, 2 for Adding an Edge,\n 3 for getting degree of a vertex, 4 for Displaying the Adjacency List,\n 5 for Searcing by BFS and 6 for Searching by DFS, \n 7 for Finding path, 8 for Checking if graph is Connected and \n 9 for checking if graph is Cyclic : ";
         cin>>action;
 
         switch(action)
@@ -89,6 +89,25 @@ int main()
                 cout<<"\n";
                 myGraph.FindPath(v1,v2);
             break;
+
+            case 8:
+            {
+                if(myGraph.IsConnected())
+                {
+                    cout<<"All vertices of the graph are connected\n";
+                }
+                else
+                    cout<<"All vertices are not connected in this graph\n";
+            }
+            case 9:
+            {
+                if(myGraph.IsCyclic())
+                {
+                    cout<<"The graph has cycles present in it\n";
+                }
+                else
+                    cout<<"There are no cycles in this graph\n";
+            }
 
             default:
                 cout<<"Program Successfully Exited.\n";

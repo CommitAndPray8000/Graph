@@ -45,6 +45,82 @@ class GraphAL
         curr -> VNext = temp;
     }
 
+    void RemoveVertex(int value)
+    {
+        Vertex *V = GetVerAddress(value);
+
+        if(V == nullptr)
+        {
+            cout<<"The Vertex Does not exist.\n";
+            return;
+        }
+
+        Edge *tempEdge = V -> EdgeList;
+        while(tempEdge != nullptr)
+        {
+            Edge *prevEdge = tempEdge;
+            tempEdge = tempEdge -> ENext;
+            delete prevEdge;
+        }
+        Vertex *tempVertex = First;
+        while(tempVertex != nullptr)
+        {
+            if(tempVertex != V)
+            {
+                if(tempVertex->EdgeList == nullptr) 
+                {
+                     tempVertex = tempVertex->VNext; continue; 
+                }
+                if(tempVertex -> EdgeList -> AdjV == V)
+                {
+                    Edge *to_del = tempVertex ->EdgeList;
+                    tempVertex -> EdgeList = tempVertex -> EdgeList -> ENext;
+                    delete to_del;
+                }
+                else
+                {
+                    tempEdge = tempVertex -> EdgeList;
+                    while(tempEdge -> ENext != nullptr)
+                    {
+                        Edge *prevEdge = tempEdge;
+                        tempEdge = tempEdge -> ENext;
+                        if(tempEdge -> AdjV == V)
+                        {
+                            prevEdge -> ENext = tempEdge ->ENext;
+                            delete tempEdge;
+                            break;
+                        }
+                        
+                    }
+                }
+            }
+
+            tempVertex = tempVertex ->VNext;
+        }
+        if(First == V)
+        {
+            First = V -> VNext;
+            delete V;
+            return;
+        }
+        tempVertex = First;
+        while(tempVertex -> VNext != nullptr)
+        {
+            Vertex *prev = tempVertex;  
+            tempVertex = tempVertex -> VNext; 
+            if(tempVertex == V)
+            {
+                prev -> VNext = tempVertex -> VNext;
+                delete tempVertex;
+                return;
+
+            }
+            
+        }
+
+
+    }
+
     Vertex *GetVerAddress(int v)
     {
         Vertex *curr = First;
@@ -95,19 +171,22 @@ class GraphAL
 
         if(!DirecetedOrNot)
         {
-            tempEdge -> AdjV = curr1;
+            Edge *tempEdge2 = new Edge;
+            
+            tempEdge2 -> AdjV = curr1;
+            tempEdge2 -> ENext = nullptr;
             if(curr2 -> EdgeList == nullptr)
             {
-                curr2 -> EdgeList = tempEdge;
+                curr2 -> EdgeList = tempEdge2;
                 cout<<"Path between "<<v2<<" and "<<v1<<" Also Successfully added.\n";
                 return;
             }
             Edge * currEdge = curr2 -> EdgeList;
-            while(currEdge != nullptr)
+            while(currEdge -> ENext != nullptr)
             {
                 currEdge = currEdge -> ENext;
             }
-            currEdge = tempEdge;
+            currEdge -> ENext = tempEdge2;
             cout<<"Path between "<<v2<<" and "<<v1<<" Also Successfully added.\n";
         }
 
@@ -275,6 +354,7 @@ class GraphAL
             if(curr -> element == v2)
             {
                 pathfound = true;
+                break;
             }
             Edge *tempEdge = curr -> EdgeList;
 
@@ -294,10 +374,13 @@ class GraphAL
             if(backtrack)
                 continue;
 
-            result.push_back(PathDFSStack.PopStack() -> element);
+            PathDFSStack.PopStack();
         }
         if(pathfound)
         {   
+            while(PathDFSStack.top != nullptr)
+                result.push_back(PathDFSStack.PopStack() -> element);
+                
             cout<<"The path between "<<v1 <<" and "<<v2 <<" is: ";
             for(int i=size(result)-1; i>=0; i--)
             {
@@ -318,9 +401,109 @@ class GraphAL
         }
     }
 
+    
+    bool IsConnected()
+    {
+        DynamicStack ConnectedDFSStack;
+        Vertex *Start = First;
+        Vertex *curr = nullptr;
+        bool result = false;
+        ConnectedDFSStack.PushStack(Start);
+        Start -> visited = true;
+        while(ConnectedDFSStack.top != nullptr)
+        {
+            bool backtrack = false;
+            curr = ConnectedDFSStack.top -> element;
+            
+            Edge *tempEdge = curr -> EdgeList;
+            
+            while(tempEdge!= nullptr)
+            {
+                
+                if(!(tempEdge -> AdjV -> visited))
+                {
+                    ConnectedDFSStack.PushStack(tempEdge -> AdjV);
+                    tempEdge -> AdjV -> visited = true;
+                    backtrack = true;
+                    
+                    break;
+                }
+                tempEdge = tempEdge -> ENext;
+            }
+            if(backtrack)
+            continue;
+            
+            ConnectedDFSStack.PopStack();
+        }
+        
+        curr = First;
+        while(curr != nullptr)
+        {
+            if(curr -> visited == false)
+            {
+                result = false;
+                break;
+            }
+            result = true;
+            curr = curr -> VNext;
+        }
+        
+        curr = First;
+        while(curr != nullptr)
+        {
+            curr -> visited = false;
+            curr = curr -> VNext;
+        }
+        return result;
+    }
+    
     bool IsCyclic()
     {
-         
+        //|||||||||||| Works only for Un-Directed as of now |||||||||||||||||||||
+        DynamicStack ConnectedDFSStack;
+        Vertex *Start = First;
+        Vertex *curr = nullptr;
+        bool result = false;
+        ConnectedDFSStack.PushStack(Start);
+        Start -> visited = true;
+        while(ConnectedDFSStack.top != nullptr && result == false)
+        {
+            bool backtrack = false;
+            curr = ConnectedDFSStack.top -> element;
+            
+            Edge *tempEdge = curr -> EdgeList;
+            
+            while(tempEdge!= nullptr)
+            {
+                
+                if(!(tempEdge -> AdjV -> visited))
+                {
+                    ConnectedDFSStack.PushStack(tempEdge -> AdjV);
+
+                    tempEdge -> AdjV -> visited = true;
+                    backtrack = true;
+                    
+                    break;
+                }
+                else
+                {
+                    result = true;
+                    break;
+                }
+                tempEdge = tempEdge -> ENext;
+            }
+            if(backtrack)
+            continue;
+            
+            ConnectedDFSStack.PopStack();
+        } 
+        curr = First;
+        while(curr != nullptr)
+        {
+            curr -> visited = false;
+            curr = curr -> VNext;
+        }
+        return result;;
     }
 
     void DisplayAdjList()

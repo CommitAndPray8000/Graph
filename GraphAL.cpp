@@ -459,7 +459,7 @@ class GraphAL
     
     bool IsCyclic()
     {
-        //|||||||||||| Works only for Un-Directed as of now |||||||||||||||||||||
+        //|||||||||||| Works only forDirected as of now |||||||||||||||||||||
         DynamicStack ConnectedDFSStack;
         Vertex *Start = First;
         Vertex *curr = nullptr;
